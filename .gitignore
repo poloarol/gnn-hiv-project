@@ -220,3 +220,6 @@ __marimo__/
 .streamlit/secrets.toml
 
 /data/processed
+/data/images
+/mlartifacts
+/mlflow.db

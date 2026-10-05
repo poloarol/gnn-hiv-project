@@ -7,7 +7,9 @@ import pandas as pd
 import seaborn as sns
 import torch
 
+from pathlib import Path
 from mango import scheduler, Tuner
+from mlflow.models import infer_signature
 from sklearn.metrics import confusion_matrix, f1_score, \
     accuracy_score, precision_score, recall_score, roc_auc_score
 from torch_geometric.data import DataLoader
@@ -45,7 +47,8 @@ def train_one_epoch(epoch, model, train_loader, optimizer, loss_fn):
                                 batch.edge_index, 
                                 batch.batch) 
         # Calculating the loss and gradients
-        loss = loss_fn(torch.squeeze(pred), batch.y.float())
+        loss = loss_fn(pred.view(-1), batch.y.float().view(-1))
+
         loss.backward()  
         optimizer.step()  
         # Update tracking
@@ -89,14 +92,28 @@ def test(epoch, model, test_loader, loss_fn):
     return running_loss/step
 
 def log_conf_matrix(y_pred, y_true, epoch):
-    # Log confusion matrix as image
-    cm = confusion_matrix(y_pred, y_true)
+    cm = confusion_matrix(y_true, y_pred)
+
     classes = ["0", "1"]
-    df_cfm = pd.DataFrame(cm, index = classes, columns = classes)
-    plt.figure(figsize = (10,7))
-    cfm_plot = sns.heatmap(df_cfm, annot=True, cmap='Blues', fmt='g')
-    cfm_plot.figure.savefig(f'data/images/cm_{epoch}.png')
-    mlflow.log_artifact(f"data/images/cm_{epoch}.png")
+    df_cfm = pd.DataFrame(cm, index=classes, columns=classes)
+
+    plt.figure(figsize=(10, 7))
+    cfm_plot = sns.heatmap(
+        df_cfm,
+        annot=True,
+        cmap="Blues",
+        fmt="g"
+    )
+
+    image_dir = Path("data/images")
+    image_dir.mkdir(parents=True, exist_ok=True)
+
+    image_path = image_dir / f"cm_{epoch}.png"
+    cfm_plot.figure.savefig(image_path, bbox_inches="tight")
+
+    mlflow.log_artifact(str(image_path))
+
+    plt.close()
 
 def calculate_metrics(y_pred, y_true, epoch, type):
     print(f"\n Confusion matrix: \n {confusion_matrix(y_pred, y_true)}")
@@ -115,6 +132,45 @@ def calculate_metrics(y_pred, y_true, epoch, type):
     except:
         mlflow.log_metric(key=f"ROC-AUC-{type}", value=float(0), step=epoch)
         print(f"ROC AUC: notdefined")
+
+
+def log_model_to_mlflow(model, train_loader):
+    """
+    Log a trained PyTorch Geometric model to MLflow.
+    """
+
+    model.eval()
+
+    # Get one batch from the training loader
+    example_batch = next(iter(train_loader))
+
+    # The model expects:
+    # forward(x, edge_attr, edge_index, batch_index)
+    input_example = (
+        example_batch.x.cpu(),
+        example_batch.edge_attr.cpu(),
+        example_batch.edge_index.cpu(),
+        example_batch.batch.cpu()
+    )
+
+    # Generate example output
+    with torch.no_grad():
+        output = model(*input_example)
+
+    # Generate MLflow signature
+    signature = infer_signature(
+        input_example,
+        output.cpu()
+    )
+
+    # Log model using pickle serialization
+    mlflow.pytorch.log_model(
+        model,
+        "model",
+        signature=signature,
+        input_example=input_example,
+        serialization_format="pickle"
+    )
 
 
 def run_one_training(params):
@@ -173,7 +229,7 @@ def run_one_training(params):
                     if float(loss) < best_loss:
                         best_loss = loss
                         # Save the currently best model 
-                        mlflow.pytorch.log_model(model, "model", signature=SIGNATURE)
+                        log_model_to_mlflow(model, train_loader)
                         early_stopping_counter = 0
                     else:
                         early_stopping_counter += 1

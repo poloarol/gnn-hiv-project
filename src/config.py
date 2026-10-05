@@ -9,15 +9,16 @@ HYPERPARAMETERS = {
     "weight_decay": [0.0001, 0.00001, 0.001],
     "sgd_momentum": [0.9, 0.8, 0.5],
     "scheduler_gamma": [0.995, 0.9, 0.8, 0.5, 1],
-    "pos_weight" : [1.0],  
+    "pos_weight": [1.0],
     "model_embedding_size": [8, 16, 32, 64, 128],
     "model_attention_heads": [1, 2, 3, 4],
     "model_layers": [3],
     "model_dropout_rate": [0.2, 0.5, 0.9],
     "model_top_k_ratio": [0.2, 0.5, 0.8, 0.9],
-    "model_top_k_every_n": [0],
+    "model_top_k_every_n": [1, 2, 3],
     "model_dense_neurons": [16, 128, 64, 256, 32]
 }
+
 
 BEST_PARAMETERS = {
     "batch_size": [128],
