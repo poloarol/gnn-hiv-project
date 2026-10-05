@@ -1,87 +1,55 @@
-GNN HIV Activity Prediction
+# GNN HIV Activity Prediction
 
 A Graph Neural Network project for predicting whether a molecule is active against HIV using molecular graph representations.
-
 The project uses PyTorch Geometric to represent molecules as graphs, with RDKit and DeepChem used for molecular processing and featurization. The project also incorporates MLflow for experiment tracking and reproducibility.
-
 Project status: Work in progress / research project
 
 Overview
-
 The goal of this project is to build a Graph Neural Network (GNN) capable of predicting HIV activity directly from molecular structures.
-
 Each molecule is represented as a graph:
 
-Nodes represent atoms.
-
-Edges represent chemical bonds.
-
-Node features describe the properties of individual atoms.
-
-Edge features describe the properties of chemical bonds.
-
-The model performs graph-level binary classification.
+- Nodes represent atoms.
+- Edges represent chemical bonds.
+- Node features describe the properties of individual atoms.
+- Edge features describe the properties of chemical bonds.
+- The model performs graph-level binary classification.
 
 The target variable is:
-
-HIV_active
-
+- HIV_active
 
 where:
-
 1 = HIV active
-
 0 = HIV inactive
 
 The project focuses particularly on the severe class imbalance present in HIV activity data and investigates oversampling as a way of improving minority-class representation during training.
 
-Current Project Status
-
+## Current Project Status
 The following components are currently being developed or implemented:
-
- HIV dataset exploration
-
- Class distribution analysis
-
- Molecular visualization with RDKit
-
- Python virtual environment setup
-
- Molecular graph processing with PyTorch Geometric
-
- Integration with RDKit
-
- Integration with DeepChem
-
- Training/test data splitting
-
- Stratified 80/20 train/test split
-
- Random oversampling of the minority class
-
- MLflow experiment tracking setup
-
- Final GNN architecture
-
- Systematic hyperparameter optimization
-
- Final model evaluation
-
- Model comparison
-
- Final experiment results
-
- Model checkpointing / deployment
+ - HIV dataset exploration
+ - Class distribution analysis
+ - Molecular visualization with RDKit
+ - Python virtual environment setup
+ - Molecular graph processing with PyTorch Geometric
+ - Integration with RDKit
+ - Integration with DeepChem
+ - Training/test data splitting
+ - Stratified 80/20 train/test split
+ - Random oversampling of the minority class
+ - MLflow experiment tracking setup
+ - Final GNN architecture
+ - Systematic hyperparameter optimization
+ - Final model evaluation
+ - Model comparison
+ - Final experiment results
+ - Model checkpointing / deployment
 
 Dataset
-
 The project uses the HIV activity dataset containing molecular structures represented by SMILES strings and corresponding HIV activity labels.
-
 The primary columns used by the project include:
 
 Column	Description
-smiles	SMILES representation of the molecule
-HIV_active	Binary HIV activity label
+- smiles	SMILES representation of the molecule
+- HIV_active	Binary HIV activity label
 
 The dataset is highly imbalanced, with substantially fewer HIV-active compounds than inactive compounds.
 
@@ -112,7 +80,7 @@ train_data, test_data = train_test_split(
 Important: oversampling is applied only to the training data
 
 The intended workflow is:
-
+```
 Original dataset
        │
        ▼
@@ -131,7 +99,7 @@ Balanced training   Unmodified test
        └───────┬───────┘
                ▼
           Model evaluation
-
+```
 
 This prevents duplicated training examples from appearing in the test set and causing data leakage.
 
@@ -142,13 +110,13 @@ Because the HIV-active class is substantially smaller than the inactive class, t
 Positive examples are sampled with replacement until the two classes are balanced in the training set.
 
 Conceptually:
-
+```
 additional_pos = positive_data.sample(
     n=neg_class - pos_class,
     replace=True,
     random_state=42
 )
-
+```
 
 The resulting training set contains approximately equal numbers of active and inactive molecules.
 
@@ -165,7 +133,7 @@ Molecular Representation
 Molecules are converted from SMILES strings into graph representations using the molecular-processing tools in the project.
 
 A simplified representation is:
-
+```
                  Molecular Graph
 
               O
@@ -176,7 +144,7 @@ A simplified representation is:
        / \
       C   C
 
-
+```
 Each graph contains:
 
 Nodes  → atoms
@@ -192,14 +160,14 @@ Molecular Visualization
 RDKit is used to visualize molecules from their SMILES representations.
 
 For example:
-
+```
 from rdkit import Chem
 from rdkit.Chem import Draw
 
 mol = Chem.MolFromSmiles(smiles)
 
 Draw.MolToImage(mol)
-
+```
 
 The project also supports displaying multiple randomly selected active and inactive molecules for qualitative inspection.
 
@@ -208,7 +176,7 @@ Model
 The central model is a Graph Neural Network implemented with PyTorch Geometric.
 
 The general workflow is:
-
+```
 SMILES
   │
   ▼
@@ -232,7 +200,7 @@ Binary classifier
   │
   ▼
 P(HIV active)
-
+```
 
 The final GNN architecture and hyperparameters are still under development.
 
@@ -284,7 +252,7 @@ The intention is to make model comparisons reproducible by recording both model 
 Project Structure
 
 The repository is currently organized approximately as follows:
-
+```
 gnn-hiv-project/
 │
 ├── data/
@@ -300,7 +268,7 @@ gnn-hiv-project/
 └── README.md
 
 data/
-
+```
 Contains the project datasets and generated data files.
 
 Raw and processed datasets should be kept separate where possible.
@@ -351,12 +319,12 @@ uv pip install ipykernel
 
 
 Register the environment:
-
+```
 python -m ipykernel install \
     --user \
     --name=gnn-hiv \
     --display-name "Python (gnn-hiv)"
-
+```
 
 The Python (gnn-hiv) kernel can then be selected from Jupyter.
 
