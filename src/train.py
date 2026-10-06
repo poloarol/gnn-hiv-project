@@ -187,8 +187,8 @@ def run_one_training(params):
         params["model_edge_dim"] = train_dataset[0].edge_attr.shape[1]
 
         # Prepare training
-        train_loader = DataLoader(train_dataset, batch_size=params["batch_size"], shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=params["batch_size"], shuffle=True)
+        train_loader = DataLoader(train_dataset, batch_size=params["batch_size"], shuffle=True, drop_last=True)
+        test_loader = DataLoader(test_dataset, batch_size=params["batch_size"], shuffle=True, drop_last=True)
 
         # Loading the model
         print("Loading model...")

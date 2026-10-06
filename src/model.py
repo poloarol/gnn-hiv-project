@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from torch.nn import Linear, BatchNorm1d, ModuleList
+from torch.nn import Linear, BatchNorm1d, ModuleList, LayerNorm
 from torch_geometric.nn import TransformerConv, TopKPooling 
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 
@@ -37,7 +37,7 @@ class GNN(torch.nn.Module):
                                     beta=True) 
 
         self.transf1 = Linear(embedding_size*n_heads, embedding_size)
-        self.bn1 = BatchNorm1d(embedding_size)
+        self.bn1 = LayerNorm(embedding_size)
 
         # Other layers
         for i in range(self.n_layers):
@@ -49,7 +49,7 @@ class GNN(torch.nn.Module):
                                                     beta=True))
 
             self.transf_layers.append(Linear(embedding_size*n_heads, embedding_size))
-            self.bn_layers.append(BatchNorm1d(embedding_size))
+            self.bn_layers.append(LayerNorm(embedding_size))
             if i % self.top_k_every_n == 0:
                 self.pooling_layers.append(TopKPooling(embedding_size, ratio=top_k_ratio))
             

@@ -45,12 +45,12 @@ The following components are currently being developed or implemented:
  - Final experiment results
  - Model checkpointing / deployment
 
-Dataset
+## Dataset
 The project uses the HIV activity dataset containing molecular structures represented by SMILES strings and corresponding HIV activity labels.
 
 The primary columns used by the project include:
 
-Column	Description
+### Column	Description
 - smiles	SMILES representation of the molecule
 - HIV_active	Binary HIV activity label
 
@@ -58,7 +58,7 @@ The dataset is highly imbalanced, with substantially fewer HIV-active compounds 
 
 This imbalance is an important consideration for both model training and evaluation.
 
-Class imbalance
+### Class imbalance
 
 The project first examines the distribution of:
 
@@ -71,7 +71,7 @@ HIV_active
 
 The class distribution is visualized using a logarithmic count plot to make the difference between the classes easier to see.
 
-Data Splitting
+## Data Splitting
 
 The dataset is split into training and test sets using an 80/20 split.
 
@@ -111,7 +111,7 @@ Balanced training   Unmodified test
 
 This prevents duplicated training examples from appearing in the test set and causing data leakage.
 
-Oversampling
+## Oversampling
 
 Because the HIV-active class is substantially smaller than the inactive class, the project currently uses random oversampling.
 
@@ -128,7 +128,7 @@ additional_pos = positive_data.sample(
 
 The resulting training set contains approximately equal numbers of active and inactive molecules.
 
-Random oversampling vs. SMOTE
+## Random oversampling vs. SMOTE
 
 The current implementation uses random oversampling, not SMOTE.
 
@@ -136,7 +136,7 @@ Random oversampling duplicates existing molecular examples.
 
 SMOTE, by contrast, creates synthetic feature-space samples by interpolating between minority examples. Because molecular data is represented as graphs rather than ordinary tabular feature vectors, applying conventional SMOTE directly to molecular graphs requires additional consideration.
 
-Molecular Representation
+## Molecular Representation
 
 Molecules are converted from SMILES strings into graph representations using the molecular-processing tools in the project.
 
@@ -163,7 +163,7 @@ Label  → HIV activity
 
 RDKit is used to parse and inspect molecular structures, while PyTorch Geometric provides the graph data structures used by the GNN.
 
-Molecular Visualization
+## Molecular Visualization
 
 RDKit is used to visualize molecules from their SMILES representations.
 
@@ -179,7 +179,7 @@ Draw.MolToImage(mol)
 
 The project also supports displaying multiple randomly selected active and inactive molecules for qualitative inspection.
 
-Model
+## Model
 
 The central model is a Graph Neural Network implemented with PyTorch Geometric.
 
@@ -212,30 +212,6 @@ P(HIV active)
 
 The final GNN architecture and hyperparameters are still under development.
 
-Experiment Tracking
-
-The project uses MLflow to track experiments.
-
-The environment information being recorded includes:
-
-PyTorch version
-
-PyTorch Geometric version
-
-DeepChem version
-
-RDKit version
-
-NumPy version
-
-pandas version
-
-CUDA availability
-
-CUDA version
-
-GPU device name
-
 For example:
 ```
 mlflow.log_params({
@@ -253,4 +229,39 @@ mlflow.log_params({
         else "N/A"
     ),
 })
+```
+
+## Usage
+
+### Build virtual environment
+
+```
+python -m pip install -r requirements.txt
+```
+
+### Train/Test Split and Oversampling
+
+```
+python src/oversample.py
+```
+
+### Building Graph Data
+
+```
+python src/dataset --root data --filename HIV_train.csv
+python src/dataset --root data --filename HIV_test.csv
+```
+
+### Training and Evaluating model
+
+In one terminal:
+
+```
+mlflow server --host 127.0.0.1 --port 5000
+```
+
+In another terminal:
+
+```
+python src/train.py
 ```
