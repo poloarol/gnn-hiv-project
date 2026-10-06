@@ -18,8 +18,10 @@ The target variable is:
 - HIV_active
 
 where:
+```
 1 = HIV active
 0 = HIV inactive
+```
 
 The project focuses particularly on the severe class imbalance present in HIV activity data and investigates oversampling as a way of improving minority-class representation during training.
 
@@ -45,6 +47,7 @@ The following components are currently being developed or implemented:
 
 Dataset
 The project uses the HIV activity dataset containing molecular structures represented by SMILES strings and corresponding HIV activity labels.
+
 The primary columns used by the project include:
 
 Column	Description
@@ -59,8 +62,12 @@ Class imbalance
 
 The project first examines the distribution of:
 
+```
 hiv_df["HIV_active"].value_counts()
-
+HIV_active
+0    39684
+1     1443
+```
 
 The class distribution is visualized using a logarithmic count plot to make the difference between the classes easier to see.
 
@@ -69,13 +76,14 @@ Data Splitting
 The dataset is split into training and test sets using an 80/20 split.
 
 The split is stratified by HIV_active so that the class proportions are approximately preserved between the two datasets.
-
+```
 train_data, test_data = train_test_split(
     data,
     test_size=0.20,
     stratify=data["HIV_active"],
     random_state=42
 )
+```
 
 Important: oversampling is applied only to the training data
 
@@ -146,12 +154,12 @@ A simplified representation is:
 
 ```
 Each graph contains:
-
+```
 Nodes  → atoms
 Edges  → chemical bonds
 Graph  → complete molecule
 Label  → HIV activity
-
+```
 
 RDKit is used to parse and inspect molecular structures, while PyTorch Geometric provides the graph data structures used by the GNN.
 
@@ -229,7 +237,7 @@ CUDA version
 GPU device name
 
 For example:
-
+```
 mlflow.log_params({
     "torch_version": torch.__version__,
     "torch_geometric_version": torch_geometric.__version__,
@@ -245,206 +253,4 @@ mlflow.log_params({
         else "N/A"
     ),
 })
-
-
-The intention is to make model comparisons reproducible by recording both model hyperparameters and the software/hardware environment used for each run.
-
-Project Structure
-
-The repository is currently organized approximately as follows:
 ```
-gnn-hiv-project/
-│
-├── data/
-│   └── ...
-│
-├── notebooks/
-│   └── ...
-│
-├── src/
-│   └── ...
-│
-├── .gitignore
-└── README.md
-
-data/
-```
-Contains the project datasets and generated data files.
-
-Raw and processed datasets should be kept separate where possible.
-
-notebooks/
-
-Contains exploratory analysis and experimentation, including:
-
-Dataset exploration
-
-Class distribution analysis
-
-Molecular visualization
-
-Model experimentation
-
-src/
-
-Contains reusable Python code for the project, including data processing and training-related scripts.
-
-Environment
-
-The project uses a Python virtual environment.
-
-Because the project depends on packages such as PyTorch, PyTorch Geometric, RDKit, and DeepChem, Python/package compatibility is important.
-
-A Python 3.12 environment is currently recommended.
-
-Using uv:
-
-uv python install 3.12
-
-uv venv --python 3.12 env
-
-
-Activate the environment on Windows:
-
-.\env\Scripts\Activate.ps1
-
-
-Then install the required packages.
-
-Jupyter
-
-To use the environment as a Jupyter kernel:
-
-uv pip install ipykernel
-
-
-Register the environment:
-```
-python -m ipykernel install \
-    --user \
-    --name=gnn-hiv \
-    --display-name "Python (gnn-hiv)"
-```
-
-The Python (gnn-hiv) kernel can then be selected from Jupyter.
-
-Reproducibility
-
-Random seeds are used where appropriate to make experiments reproducible.
-
-For example:
-
-random_state=42
-
-
-is currently used for dataset splitting and oversampling.
-
-MLflow is also used to record the software and hardware environment associated with experiments.
-
-Future versions of the project will additionally track:
-
-Model hyperparameters
-
-Dataset versions
-
-Training metrics
-
-Validation metrics
-
-Test metrics
-
-Model checkpoints
-
-Git commit
-
-Random seeds
-
-Evaluation
-
-Because this is an imbalanced binary classification problem, accuracy alone is not sufficient to evaluate the model.
-
-The final evaluation should include metrics such as:
-
-ROC-AUC
-
-PR-AUC / Average Precision
-
-Precision
-
-Recall
-
-F1 score
-
-Confusion matrix
-
-Particular attention should be given to precision-recall performance, since the positive HIV-active class is relatively rare.
-
-Final model results will be added once the GNN training pipeline and experiments have been finalized.
-
-Future Work
-
-The next stages of the project are:
-
-Finalize the GNN architecture.
-
-Establish a baseline model.
-
-Train using the imbalanced dataset.
-
-Train using random oversampling.
-
-Compare model performance with and without oversampling.
-
-Perform systematic hyperparameter optimization.
-
-Track all experiments using MLflow.
-
-Evaluate using ROC-AUC and PR-AUC alongside precision, recall, and F1.
-
-Investigate molecular/scaffold-based splitting to provide a more stringent measure of generalization.
-
-Save and document the best-performing model.
-
-Limitations
-
-The current project is still under development.
-
-In particular:
-
-The final model architecture has not yet been established.
-
-Final benchmark results have not yet been reported.
-
-Random oversampling is currently being used rather than synthetic graph generation.
-
-A random 80/20 split may provide an optimistic estimate of generalization because chemically similar molecules can occur in both training and test sets.
-
-A scaffold-based split is therefore an important future improvement for evaluating whether the model generalizes to structurally different molecules.
-
-Technologies
-
-The project currently uses:
-
-Python
-
-PyTorch
-
-PyTorch Geometric
-
-RDKit
-
-DeepChem
-
-pandas
-
-NumPy
-
-Jupyter
-
-MLflow
-
-Project Status
-
-This repository represents an ongoing exploration of graph-based molecular machine learning for HIV activity prediction.
-
-The current priority is establishing a reproducible baseline, handling the severe class imbalance appropriately, and comparing GNN experiments using consistent evaluation and MLflow tracking.
